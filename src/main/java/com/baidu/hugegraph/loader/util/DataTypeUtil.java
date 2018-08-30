@@ -28,6 +28,8 @@ import static com.baidu.hugegraph.structure.constant.DataType.LONG;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.baidu.hugegraph.structure.constant.Cardinality;
@@ -50,6 +52,15 @@ public final class DataTypeUtil {
                 return valueToDate(value, dataType);
             } else if (dataType.isUUID()) {
                 return valueToUUID(value, dataType);
+            }
+        } else if (propertyKey.cardinality() == Cardinality.SET) {
+            if (value instanceof String) {
+                return JsonUtil.fromJson((String) value, Set.class);
+            }
+        } else {
+            assert propertyKey.cardinality() == Cardinality.LIST;
+            if (value instanceof String) {
+                return JsonUtil.fromJson((String) value, List.class);
             }
         }
 

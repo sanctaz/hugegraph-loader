@@ -130,11 +130,7 @@ public class LoaderTest {
         String[] args = new String[]{"-f", "example/struct.json",
                                      "-g", "hugegraph",
                                      "--num-threads", "2"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<PropertyKey> propertyKeys = client.schema().getPropertyKeys();
         propertyKeys.forEach(pkey -> {
@@ -200,11 +196,7 @@ public class LoaderTest {
                                      "-g", "hugegraph",
                                      "--num-threads", "2",
                                      "--test-mode", "true"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
         List<Edge> edges = client.graph().listEdges();
@@ -337,11 +329,7 @@ public class LoaderTest {
                                      "--num-threads", "2",
                                      "--test-mode", "true"};
 
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
         Assert.assertEquals(1, vertices.size());
@@ -362,11 +350,7 @@ public class LoaderTest {
                                      "-s", path("schema.groovy"),
                                      "--num-threads", "2",
                                      "--test-mode", "true"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
         Assert.assertEquals(1, vertices.size());
@@ -387,11 +371,7 @@ public class LoaderTest {
                                      "--num-threads", "2",
                                      "--test-mode", "true"};
 
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
         Assert.assertEquals(1, vertices.size());
@@ -421,9 +401,8 @@ public class LoaderTest {
 
         try {
             HugeGraphLoader.main(args);
-        } catch (Exception e) {
+        } finally {
             FileUtil.delete(path("edge_use.json"));
-            Assert.fail("Should not throw exception, but throw " + e);
         }
 
         List<Edge> edges = client.graph().listEdges();
@@ -434,8 +413,6 @@ public class LoaderTest {
         Assert.assertEquals("software", edge.targetLabel());
         Assert.assertEquals(ImmutableList.of("so so", "good", "good"),
                             edge.property("feel"));
-
-        FileUtil.delete(path("edge_use.json"));
     }
 
     @Test
@@ -458,9 +435,8 @@ public class LoaderTest {
 
         try {
             HugeGraphLoader.main(args);
-        } catch (Exception e) {
+        } finally {
             FileUtil.delete(path("edge_use.json"));
-            Assert.fail("Should not throw exception, but throw " + e);
         }
 
         List<Edge> edges = client.graph().listEdges();
@@ -475,8 +451,6 @@ public class LoaderTest {
          */
         Assert.assertEquals(ImmutableList.of("20171210", "20180101"),
                             edge.property("time"));
-
-        FileUtil.delete(path("edge_use.json"));
     }
 
     @Test
@@ -492,9 +466,8 @@ public class LoaderTest {
 
         try {
             HugeGraphLoader.main(args);
-        } catch (Exception e) {
+        } finally {
             FileUtil.delete(path("vertex_person_number_id.csv"));
-            Assert.fail("Should not throw exception, but throw " + e);
         }
 
         List<Vertex> vertices = client.graph().listVertices();
@@ -502,8 +475,6 @@ public class LoaderTest {
 
         List<Edge> edges = client.graph().listEdges();
         Assert.assertEquals(1, edges.size());
-
-        FileUtil.delete(path("vertex_person_number_id.csv"));
     }
 
     @Test
@@ -515,11 +486,7 @@ public class LoaderTest {
                                      "-s", path("schema_joint_pk.groovy"),
                                      "-g", "hugegraph",
                                      "--test-mode", "true"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
 
@@ -542,11 +509,7 @@ public class LoaderTest {
                                      "-s", path("schema.groovy"),
                                      "-g", "hugegraph",
                                      "--test-mode", "true"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
 
@@ -566,11 +529,7 @@ public class LoaderTest {
                                      "-s", path("schema_null_value.groovy"),
                                      "-g", "hugegraph",
                                      "--test-mode", "true"};
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
 
         List<Vertex> vertices = client.graph().listVertices();
         Assert.assertEquals(3, vertices.size());
@@ -595,11 +554,8 @@ public class LoaderTest {
                                       "-g", "hugegraph",
                                       "--test-mode", "true"};
 
-        try {
-            HugeGraphLoader.main(args);
-        } catch (Exception e) {
-            Assert.fail("Should not throw exception, but throw " + e);
-        }
+        HugeGraphLoader.main(args);
+
         List<Vertex> vertices = client.graph().listVertices();
         Assert.assertEquals(2, vertices.size());
     }

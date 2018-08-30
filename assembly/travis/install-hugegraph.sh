@@ -18,7 +18,7 @@ cd hugegraph
 
 git checkout $HUGEGRAPH_BRANCH || exit 1
 
-mvn package -DskipTests || exit 1
+mvn clean package -DskipTests || exit 1
 
 mv hugegraph-*.tar.gz ../
 

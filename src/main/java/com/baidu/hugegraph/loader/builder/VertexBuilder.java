@@ -17,13 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.parser;
+package com.baidu.hugegraph.loader.builder;
 
 import java.util.List;
 import java.util.Map;
 
 import com.baidu.hugegraph.loader.executor.LoadOptions;
-import com.baidu.hugegraph.loader.reader.InputReader;
 import com.baidu.hugegraph.loader.source.VertexSource;
 import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.baidu.hugegraph.structure.graph.Vertex;
@@ -31,14 +30,13 @@ import com.baidu.hugegraph.structure.schema.SchemaLabel;
 import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.util.E;
 
-public class VertexParser extends ElementParser<Vertex> {
+public class VertexBuilder extends ElementBuilder<Vertex> {
 
     private final VertexSource source;
     private final VertexLabel vertexLabel;
 
-    public VertexParser(VertexSource source, InputReader reader,
-                        LoadOptions options) {
-        super(reader, options);
+    public VertexBuilder(VertexSource source, LoadOptions options) {
+        super(source, options);
         this.source = source;
         this.vertexLabel = this.getVertexLabel(source.label());
         // Ensure the id field is matched with id strategy
@@ -51,7 +49,7 @@ public class VertexParser extends ElementParser<Vertex> {
     }
 
     @Override
-    protected Vertex parse(Map<String, Object> keyValues) {
+    protected Vertex build(Map<String, Object> keyValues) {
         Vertex vertex = new Vertex(this.source.label());
         // Assign or check id if need
         this.assignIdIfNeed(vertex, keyValues);
@@ -109,14 +107,17 @@ public class VertexParser extends ElementParser<Vertex> {
     }
 
     private void checkIdField() {
+        String name = this.vertexLabel.name();
         if (isCustomize(this.vertexLabel.idStrategy())) {
             E.checkState(this.source.idField() != null,
-                         "The id field can't be empty or null " +
-                         "when id strategy is CUSTOMIZE");
+                         "The id field can't be empty or null when " +
+                         "id strategy is CUSTOMIZE for vertex label '%s'",
+                         name);
         } else if (isPrimaryKey(this.vertexLabel.idStrategy())) {
             E.checkState(this.source.idField() == null,
-                         "The id field must be empty or null " +
-                         "when id strategy is PRIMARY_KEY");
+                         "The id field must be empty or null when " +
+                         "id strategy is PRIMARY_KEY for vertex label '%s'",
+                         name);
         } else {
             // The id strategy is automatic
             throw new IllegalArgumentException(

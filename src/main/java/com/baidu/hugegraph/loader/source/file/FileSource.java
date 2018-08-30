@@ -42,11 +42,14 @@ public class FileSource implements InputSource {
     private String delimiter;
     @JsonProperty("charset")
     private String charset;
+    @JsonProperty("compression")
+    private Compression compression;
     @JsonProperty("comment_symbols")
     private Set<String> commentSymbols;
 
     public FileSource() {
         this.charset = DEFAULT_CHARSET;
+        this.compression = Compression.NONE;
         this.commentSymbols = new HashSet<>();
     }
 
@@ -77,6 +80,10 @@ public class FileSource implements InputSource {
 
     public String charset() {
         return this.charset;
+    }
+
+    public Compression compression() {
+        return this.compression;
     }
 
     public Set<String> commentSymbols() {

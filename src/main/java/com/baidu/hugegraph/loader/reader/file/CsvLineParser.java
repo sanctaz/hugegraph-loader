@@ -24,18 +24,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.baidu.hugegraph.loader.exception.ParseException;
-import com.baidu.hugegraph.loader.source.file.FileSource;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 
-public class CsvFileReader extends TextFileReader {
+public class CsvLineParser extends TextLineParser {
 
     private static final String DELIMITER = ",";
 
     private final CSVParser parser;
 
-    public CsvFileReader(FileSource fileSource) {
-        super(fileSource);
+    public CsvLineParser() {
         this.delimiter = DELIMITER;
         char separator = this.delimiter.charAt(0);
         this.parser = new CSVParserBuilder().withSeparator(separator)

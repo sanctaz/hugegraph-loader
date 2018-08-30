@@ -4,15 +4,11 @@
       "label": "person",
       "input": {
         "type": "file",
-        "path": "example/vertex_person.csv",
+        "path": "example/file/vertex_person.csv",
         "format": "CSV",
         "header": ["name", "age", "city"],
-        "charset": "UTF-8"
-      },
-      "mapping": {
-        "name": "name",
-        "age": "age",
-        "city": "city"
+        "charset": "UTF-8",
+        "comment_symbols": ["#"]
       },
       "null_values": ["NULL", "null", ""]
     },
@@ -20,11 +16,12 @@
       "label": "software",
       "input": {
         "type": "file",
-        "path": "example/vertex_software.text",
+        "path": "example/file/vertex_software.text",
         "format": "TEXT",
         "delimiter": "|",
         "charset": "GBK"
       },
+      "id": "id",
       "ignored": ["ISBN"]
     }
   ],
@@ -35,7 +32,7 @@
       "target": ["target_name"],
       "input": {
         "type": "file",
-        "path": "example/edge_knows.json",
+        "path": "example/file/edge_knows.json",
         "format": "JSON"
       },
       "mapping": {
@@ -46,15 +43,14 @@
     {
       "label": "created",
       "source": ["source_name"],
-      "target": ["target_name"],
+      "target": ["target_id"],
       "input": {
         "type": "file",
-        "path": "example/edge_created.json",
+        "path": "example/file/edge_created.json",
         "format": "JSON"
       },
       "mapping": {
-        "source_name": "name",
-        "target_name": "name"
+        "source_name": "name"
       }
     }
   ]

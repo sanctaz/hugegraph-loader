@@ -17,13 +17,41 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.source;
+package com.baidu.hugegraph.loader.source.file;
 
-public enum SourceType {
+public enum Compression {
 
-    FILE,
+    NONE("none"),
 
-    HDFS,
+    BZ2("bzip2"),
 
-    JDBC;
+    GZIP("gz"),
+
+    PACK200("pack200"),
+
+    XZ("xz"),
+
+    LZMA("lzma"),
+
+    SNAPPY_FRAMED("snappy-framed"),
+
+    SNAPPY_RAW("snappy-raw"),
+
+    Z("z"),
+
+    DEFLATE("deflate"),
+
+    ZIP("zip"),
+
+    ORC("orc");
+
+    private String name;
+
+    Compression(String name) {
+        this.name = name;
+    }
+
+    public String string() {
+        return this.name;
+    }
 }

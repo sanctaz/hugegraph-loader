@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.parser;
+package com.baidu.hugegraph.loader.builder;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
@@ -25,12 +25,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.loader.exception.LoadException;
 import com.baidu.hugegraph.loader.exception.ParseException;
 import com.baidu.hugegraph.loader.executor.LoadOptions;
 import com.baidu.hugegraph.loader.reader.InputReader;
+import com.baidu.hugegraph.loader.reader.InputReaderFactory;
 import com.baidu.hugegraph.loader.source.ElementSource;
+import com.baidu.hugegraph.loader.util.AutoCloseableIterator;
 import com.baidu.hugegraph.loader.util.DataTypeUtil;
 import com.baidu.hugegraph.loader.util.HugeClientWrapper;
 import com.baidu.hugegraph.structure.GraphElement;
@@ -42,11 +46,14 @@ import com.baidu.hugegraph.structure.schema.PropertyKey;
 import com.baidu.hugegraph.structure.schema.SchemaLabel;
 import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-public abstract class ElementParser<GE extends GraphElement>
-       implements Iterator<GE> {
+public abstract class ElementBuilder<GE extends GraphElement>
+       implements AutoCloseableIterator<GE> {
+
+    private static final Logger LOG = Log.logger(ElementBuilder.class);
 
     private static final int VERTEX_ID_LIMIT = 128;
     private static final String ID_CHARSET = "UTF-8";
@@ -56,11 +63,15 @@ public abstract class ElementParser<GE extends GraphElement>
     private final HugeClient client;
     private final Table<HugeType, String, SchemaElement> schemas;
 
-    ElementParser(InputReader reader, LoadOptions options) {
-        this.reader = reader;
+    public ElementBuilder(ElementSource source, LoadOptions options) {
+        this.reader = InputReaderFactory.create(source.input());
         this.client = HugeClientWrapper.get(options);
         this.schemas = HashBasedTable.create();
-        this.reader.init();
+        try {
+            this.reader.init();
+        } catch (Exception e) {
+            throw new LoadException("Failed to open input reader", e);
+        }
     }
 
     public abstract ElementSource source();
@@ -78,14 +89,19 @@ public abstract class ElementParser<GE extends GraphElement>
     public GE next() {
         String line = this.reader().line();
         try {
-            Map<String, Object> keyValues = this.reader().next();
-            return this.parse(this.filterFields(keyValues));
+            Map<String, Object> keyValues = this.reader().next().toMap();
+            return this.build(this.filterFields(keyValues));
         } catch (IllegalArgumentException e) {
             throw new ParseException(line, e.getMessage());
         }
     }
 
-    protected abstract GE parse(Map<String, Object> keyValues);
+    @Override
+    public void close() throws Exception {
+        this.reader.close();
+    }
+
+    protected abstract GE build(Map<String, Object> keyValues);
 
     protected abstract boolean isIdField(String fieldName);
 

@@ -19,16 +19,15 @@
 
 package com.baidu.hugegraph.loader.reader.file;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.baidu.hugegraph.loader.exception.LoadException;
 import com.baidu.hugegraph.loader.exception.ParseException;
+import com.baidu.hugegraph.loader.reader.Line;
 import com.baidu.hugegraph.loader.source.file.FileSource;
 import com.google.common.base.Splitter;
 
-public class TextFileReader extends FileReader {
+public class TextLineParser implements LineParser {
 
     private static final String EMPTY_STR = "";
 
@@ -38,63 +37,67 @@ public class TextFileReader extends FileReader {
     protected String delimiter;
     protected List<String> header;
 
-    public TextFileReader(FileSource source) {
-        super(source);
-        this.delimiter = DEFAULT_DELIMITER;
-        this.header = null;
+    public String delimiter() {
+        return this.delimiter;
+    }
+
+    public List<String> header() {
+        return this.header;
     }
 
     @Override
-    public void init() {
+    public void init(AbstractFileReader reader) {
         /*
-         * The delimiter must be initialized before header, because init header
-         * may use it
+         * The delimiter must be initialized before header,
+         * because init header may use it
          */
-        this.initDelimiter();
-        this.initHeader();
+        this.initDelimiter(reader.source());
+        this.initHeader(reader);
     }
 
-    protected void initDelimiter() {
-        if (this.source().delimiter() != null) {
-            this.delimiter = this.source().delimiter();
+    protected void initDelimiter(FileSource source) {
+        if (source.delimiter() != null) {
+            this.delimiter = source.delimiter();
+        } else {
+            this.delimiter = DEFAULT_DELIMITER;
         }
     }
 
-    protected void initHeader() {
-        if (this.source().header() != null) {
-            this.header = this.source().header();
+    protected void initHeader(AbstractFileReader reader) {
+        FileSource source = reader.source();
+        if (source.header() != null) {
+            this.header = source.header();
         } else {
+            String line = reader.nextLine();
             // If doesn't specify header, the first line is considered as header
-            if (this.hasNext()) {
-                this.header = this.split(this.line());
-                this.next();
+            if (line != null) {
+                this.header = this.split(line);
             } else {
                 throw new LoadException("Can't load data from empty file '%s'",
-                                        this.source().path());
+                                        source.path());
             }
             if (this.header.isEmpty()) {
-                throw new LoadException("The header is empty",
-                                        this.source().path());
+                throw new LoadException("The header is empty", source.path());
             }
         }
     }
 
     @Override
-    public Map<String, Object> transform(String line) {
-        List<String> columns = this.split(line);
+    @SuppressWarnings("unchecked")
+    public Line parse(String rawLine) {
+        List<String> columns = this.split(rawLine);
         // Ignore extra separator at the end of line
-        if (columns.size() != this.header.size() &&
-            !this.lastColumnIsEmpty(columns)) {
-            throw new ParseException(line,
-                      "The column length '%s' doesn't match with " +
-                      "header length '%s' on: %s",
-                      columns.size(), this.header.size(), line);
+        if (columns.size() != this.header.size()) {
+            if (this.lastColumnIsEmpty(columns)) {
+                columns = columns.subList(0, columns.size() - 1);
+            } else {
+                throw new ParseException(rawLine,
+                          "The column length '%s' doesn't match with " +
+                          "header length '%s' on: %s",
+                          columns.size(), this.header.size(), rawLine);
+            }
         }
-        Map<String, Object> keyValues = new HashMap<>();
-        for (int i = 0; i < this.header.size(); i++) {
-            keyValues.put(this.header.get(i), columns.get(i));
-        }
-        return keyValues;
+        return new Line(rawLine, this.header, (List<Object>) (Object) columns);
     }
 
     protected List<String> split(String line) {

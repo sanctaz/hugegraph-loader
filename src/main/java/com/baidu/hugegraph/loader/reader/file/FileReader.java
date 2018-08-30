@@ -19,115 +19,32 @@
 
 package com.baidu.hugegraph.loader.reader.file;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.loader.exception.LoadException;
-import com.baidu.hugegraph.loader.reader.InputReader;
 import com.baidu.hugegraph.loader.source.file.FileSource;
 import com.baidu.hugegraph.util.Log;
 
-public abstract class FileReader implements InputReader {
+public class FileReader extends AbstractFileReader {
 
-    private Logger LOG = Log.logger(FileReader.class);
-
-    private static final int BUF_SIZE = 5 * 1024 * 1024;
-
-    private final FileSource source;
-    private final BufferedReader reader;
-    private String nextLine;
+    private static final Logger LOG = Log.logger(FileReader.class);
 
     public FileReader(FileSource source) {
-        this.source = source;
-        try {
-            this.reader = this.open(source);
-        } catch (IOException e) {
-            throw new LoadException("Failed to load input file '%s'",
-                                    e, source.path());
-        }
-        this.nextLine = null;
-    }
-
-    public FileSource source() {
-        return this.source;
-    }
-
-    public String line() {
-        return this.nextLine;
+        super(source);
     }
 
     @Override
-    public boolean hasNext() {
-        if (this.nextLine == null) {
-            try {
-                this.nextLine = this.reader.readLine();
-            } catch (IOException e) {
-                throw new LoadException("Read next line error", e);
-            }
-        }
-        // Skip the comment line
-        if (this.nextLine != null && this.isCommentLine(this.nextLine)) {
-            this.nextLine = null;
-            return this.hasNext();
-        }
-        return this.nextLine != null;
-    }
-
-    @Override
-    public Map<String, Object> next() {
-        if (!this.hasNext()) {
-            throw new NoSuchElementException("Reach end of file");
-        }
-        String line = this.nextLine;
-        this.nextLine = null;
-        return this.transform(line);
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.reader.close();
-    }
-
-    protected abstract Map<String, Object> transform(String line);
-
-    private BufferedReader open(FileSource source) throws IOException {
-        String path = source.path();
-        String charset = source.charset();
-
-        File file = FileUtils.getFile(path);
+    protected InputStream open(FileSource source) throws IOException {
+        LOG.info("Opening file {}", source.path());
+        File file = FileUtils.getFile(source.path());
         checkFile(file);
-
-        InputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            Reader isr = new InputStreamReader(fis, charset);
-            return new BufferedReader(isr, BUF_SIZE);
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignored) {
-                    LOG.warn("Failed to close file {}", path);
-                }
-            }
-            throw e;
-        }
-    }
-
-    private boolean isCommentLine(String line) {
-        return this.source.commentSymbols().stream().anyMatch(line::startsWith);
+        return new FileInputStream(file);
     }
 
     private static void checkFile(File file) {

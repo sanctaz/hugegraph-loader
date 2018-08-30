@@ -17,13 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.source;
+package com.baidu.hugegraph.loader.reader.file;
 
-public enum SourceType {
+import com.baidu.hugegraph.loader.reader.Line;
 
-    FILE,
+public interface LineParser {
 
-    HDFS,
+    void init(AbstractFileReader reader);
 
-    JDBC;
+    Line parse(String rawLine);
 }

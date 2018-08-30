@@ -17,13 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.source;
+package com.baidu.hugegraph.loader.reader.file;
 
-public enum SourceType {
+import java.io.BufferedReader;
+import java.io.IOException;
 
-    FILE,
+public class LineReader {
 
-    HDFS,
+    private final BufferedReader reader;
 
-    JDBC;
+    public LineReader(BufferedReader reader) {
+        this.reader = reader;
+    }
+
+    public String nextLine() throws IOException {
+        return this.reader.readLine();
+    }
+
+    public void close() throws IOException {
+        this.reader.close();
+    }
 }

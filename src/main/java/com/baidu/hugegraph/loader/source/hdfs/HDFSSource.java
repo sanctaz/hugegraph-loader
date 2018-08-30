@@ -17,34 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.reader.file;
+package com.baidu.hugegraph.loader.source.hdfs;
 
-import java.util.Map;
-
-import com.baidu.hugegraph.loader.exception.ParseException;
+import com.baidu.hugegraph.loader.source.SourceType;
 import com.baidu.hugegraph.loader.source.file.FileSource;
-import com.baidu.hugegraph.rest.SerializeException;
-import com.baidu.hugegraph.util.JsonUtil;
 
-public class JsonFileReader extends FileReader {
-
-    public JsonFileReader(FileSource fileSource) {
-        super(fileSource);
-    }
+public class HDFSSource extends FileSource {
 
     @Override
-    public void init() {
-        // pass
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Map<String, Object> transform(String line) {
-        try {
-            return JsonUtil.fromJson(line, Map.class);
-        } catch (SerializeException e) {
-            throw new ParseException(line, "Deserialize line '%s' error",
-                                     e, line);
-        }
+    public SourceType type() {
+        return SourceType.HDFS;
     }
 }

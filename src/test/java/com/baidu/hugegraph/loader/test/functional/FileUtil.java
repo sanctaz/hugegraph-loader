@@ -61,7 +61,7 @@ public class FileUtil {
         } catch (IOException e) {
             throw new RuntimeException(String.format(
                       "Failed to append lines '%s' to file '%s'",
-                      lines, fileName), e);
+                      Arrays.asList(lines), fileName), e);
         }
     }
 
